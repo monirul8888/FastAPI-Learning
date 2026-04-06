@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -61,3 +61,14 @@ while True:
         print("Error : ", error)
         time.sleep(2)
 
+
+@app.get("/student/{st_id}")
+def view_student(st_id: int):
+    cursor.execute("SELECT * FROM STUDENT WHERE id = %s", (st_id,))
+    st = cursor.fetchone()  # fetch one row
+    if not st:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Student with ID {st_id} Not Found"
+        )
+    return {"Student Details": st}
