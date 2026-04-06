@@ -23,15 +23,22 @@ def about():
     return {"about" : "This is About Page"}
 
 
-
 class Student(BaseModel):
     name: str
     id: int
     dept: str
+    cgpa: float
+
 
 @app.post("/post")
 def createStudent(st: Student):
-    return {"data" : st}
+    cursor.execute(
+        "INSERT INTO STUDENT (NAME, ID, DEPT, CGPA) VALUES (%s, %s, %s, %s)",
+        (st.name, st.id, st.dept , st.cgpa)
+    )
+    
+    conn.commit()
+    return {"data": st}  
 
 
 
