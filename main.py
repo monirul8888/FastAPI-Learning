@@ -33,12 +33,12 @@ class Student(BaseModel):
 @app.post("/post")
 def createStudent(st: Student):
     cursor.execute(
-        "INSERT INTO STUDENT (NAME, ID, DEPT, CGPA) VALUES (%s, %s, %s, %s)",
+        "INSERT INTO STUDENT (NAME, ID, DEPT, CGPA) VALUES (%s, %s, %s, %s) RETURNING *",
         (st.name, st.id, st.dept , st.cgpa)
     )
-    
+    new_post = cursor.fetchone()
     conn.commit()
-    return {"data": st}  
+    return {"data": new_post}  
 
 
 
