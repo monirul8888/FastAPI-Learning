@@ -162,7 +162,7 @@ class Student(BaseModel):
 
 
 
-@app.post("/users")
+@app.post("/users", response_model=schemas.UserResponse)
 def user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     new_user = models.user(**user.model_dump())
     db.add(new_user)
