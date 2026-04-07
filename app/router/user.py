@@ -3,17 +3,18 @@ from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
-
 from .. import models, schemas, utils
 from sqlalchemy.orm import Session
 from .. database import engine, get_db
-
 from typing import List
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/users",
+    tags= ["Users"]
+)
 
 
-@router.post("/users", response_model=schemas.UserResponse)
+@router.post("/", response_model=schemas.UserResponse)
 def user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db.query(models.User).filter(models.User.email==user.email).first():
         raise HTTPException(status_code=400, detail=f"Email {user.email} already exists")

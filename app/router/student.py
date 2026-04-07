@@ -10,10 +10,13 @@ from .. database import engine, get_db
 
 from typing import List
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/student",
+    tags= ["Student"]
+)
 
 
-@router.post("/student", response_model=schemas.StudentResponse)
+@router.post("/", response_model=schemas.StudentResponse)
 def student(st: schemas.StudentCreate, db: Session = Depends(get_db)):
     new_st = models.Student(**st.model_dump())
     db.add(new_st)
@@ -21,7 +24,7 @@ def student(st: schemas.StudentCreate, db: Session = Depends(get_db)):
     db.refresh(new_st)
     return  new_st
 
-@router.get("/student", response_model=List[schemas.StudentResponse])
+@router.get("/", response_model=List[schemas.StudentResponse])
 def student(db:Session = Depends(get_db)):
 
     st = db.query(models.Student).all()
@@ -29,7 +32,7 @@ def student(db:Session = Depends(get_db)):
 
     
 
-@router.get("/student/{st_id}", response_model=schemas.StudentResponse)
+@router.get("/{st_id}", response_model=schemas.StudentResponse)
 def student(st_id: int, db:Session = Depends(get_db)):
 
     st = db.query(models.Student).filter(models.Student.id == st_id).first()
@@ -37,7 +40,7 @@ def student(st_id: int, db:Session = Depends(get_db)):
     return st
 
 
-@router.put("/student/{st_id}", response_model=schemas.StudentResponse)
+@router.put("/{st_id}", response_model=schemas.StudentResponse)
 def student(st_id: int, update_st: schemas.StudentCreate, db:Session = Depends(get_db)):
 
     st = db.query(models.Student).filter(models.Student.id == st_id)
@@ -48,7 +51,7 @@ def student(st_id: int, update_st: schemas.StudentCreate, db:Session = Depends(g
     return st_data
 
 
-@router.delete("/student/{st_id}")
+@router.delete("/{st_id}")
 def delete_student(st_id: int, db: Session = Depends(get_db)):
 
     st = db.query(models.Student).filter(models.Student.id == st_id).first()

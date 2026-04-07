@@ -8,13 +8,13 @@ app.include_router(student.router)
 
 
 
-# @app.get("/")
-# def view():
+@app.get("/")
+def view():
 
-#     cursor.execute(""" SELECT * FROM STUDENT """)
-#     data = cursor.fetchall()
-#     return {"message" : "Welcome To FastAPI",
-#             "Data": data}
+    # cursor.execute(""" SELECT * FROM STUDENT """)
+    # data = cursor.fetchall()
+    return {"message" : "Welcome To FastAPI"}
+            # "Data": data}
 
 
 
