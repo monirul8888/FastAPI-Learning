@@ -4,46 +4,41 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 
-from . import models
+from . import models, schemas
 from sqlalchemy.orm import Session
 from . database import engine, get_db
 
+from typing import List
 
 app = FastAPI()
 models.Base.metadata.create_all(bind = engine)
 
-class Student1(BaseModel):
-    name: str
-    dept: str
-    id: int
 
-@app.get("/student")
+@app.get("/student", response_model=List[schemas.StudentResponse])
 def student(db:Session = Depends(get_db)):
 
     st = db.query(models.Student).all()
+    return st
 
-    return{"status" : "SQL Alchemy Working",
-           "Student Details": st}
+    
 
-@app.get("/student/{st_id}")
+@app.get("/student/{st_id}", response_model=schemas.StudentResponse)
 def student(st_id: int, db:Session = Depends(get_db)):
 
     st = db.query(models.Student).filter(models.Student.id == st_id).first()
 
-    return{"status" : "SQL Alchemy Working",
-           "Student Details": st}
+    return st
 
 
-@app.put("/student/{st_id}")
-def student(st_id: int, update_st: Student1, db:Session = Depends(get_db)):
+@app.put("/student/{st_id}", response_model=schemas.StudentResponse)
+def student(st_id: int, update_st: schemas.StudentCreate, db:Session = Depends(get_db)):
 
     st = db.query(models.Student).filter(models.Student.id == st_id)
     st_data= st.first()
     st.update(update_st.model_dump(), synchronize_session=False )
     db.commit()
     db.refresh(st_data)
-    return{"status" : "SQL Alchemy Working",
-           "Student Details": st_data}
+    return st_data
 
 
 @app.delete("/student/{st_id}")
@@ -80,17 +75,13 @@ def delete_student(st_id: int, db: Session = Depends(get_db)):
 def about():
     return {"about" : "This is About Page"}
 
-@app.post("/student")
-def student(st: Student1, db: Session = Depends(get_db)):
-    new_st = models.Student(
-        id = st.id,
-        name = st.name,
-        dept = st.dept
-    )
+@app.post("/student", response_model=schemas.StudentResponse)
+def student(st: schemas.StudentCreate, db: Session = Depends(get_db)):
+    new_st = models.Student(**st.model_dump())
     db.add(new_st)
     db.commit()
     db.refresh(new_st)
-    return {"Student ": new_st}
+    return  new_st
 
 
 class Student(BaseModel):
