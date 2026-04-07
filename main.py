@@ -29,6 +29,12 @@ class Student(BaseModel):
     dept: str
     cgpa: float
 
+class Student1(BaseModel):
+    name: str
+  
+    dept: str
+    cgpa: float
+
 
 @app.post("/post")
 def createStudent(st: Student):
@@ -82,4 +88,15 @@ def delete (st_id : int):
     conn.commit()
 
     return {"Deleted Student : ":  st}
+
+
+@app.put("/student/update/{st_id}")
+def update_student(st_id : int, st: Student1):
+    cursor.execute(""" UPDATE STUDENT SET name = %s, dept = %s, cgpa = %s WHERE id = %s RETURNING * """,
+                   (st.name,  st.dept, st.cgpa, st_id))
+    
+    update_st = cursor.fetchone()
+    conn.commit()
+    return {"Updated Student" : update_st}
+
 
