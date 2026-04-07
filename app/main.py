@@ -18,9 +18,16 @@ class Student1(BaseModel):
     id: int
 
 
-@app.get("/studentDb")
+@app.get("/student")
 def student(db:Session = Depends(get_db)):
-    return{"status" : "SQL Alchemy Working"}
+
+    st = db.query(models.Student).all()
+
+
+
+    return{"status" : "SQL Alchemy Working",
+           "Student Details": st}
+
 
 
 
