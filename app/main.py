@@ -5,16 +5,21 @@ from psycopg2.extras import RealDictCursor
 import time
 
 from . import models
-from sqlalchemy.orm import session
+from sqlalchemy.orm import Session
 from . database import engine, get_db
 
 
 app = FastAPI()
 models.Base.metadata.create_all(bind = engine)
 
+class Student1(BaseModel):
+    name: str
+    dept: str
+    id: int
+
 
 @app.get("/studentDb")
-def student(db:session = Depends(get_db)):
+def student(db:Session = Depends(get_db)):
     return{"status" : "SQL Alchemy Working"}
 
 
@@ -33,6 +38,18 @@ def student(db:session = Depends(get_db)):
 def about():
     return {"about" : "This is About Page"}
 
+@app.post("/student")
+def student(st: Student1, db: Session = Depends(get_db)):
+    new_st = models.Student(
+        id = st.id,
+        name = st.name,
+        dept = st.dept
+    )
+    db.add(new_st)
+    db.commit()
+    db.refresh(new_st)
+    return {"Student ": new_st}
+
 
 class Student(BaseModel):
     name: str
@@ -40,11 +57,6 @@ class Student(BaseModel):
     dept: str
     cgpa: float
 
-class Student1(BaseModel):
-    name: str
-  
-    dept: str
-    cgpa: float
 
 
 # @app.post("/post")
