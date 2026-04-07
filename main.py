@@ -65,10 +65,21 @@ while True:
 @app.get("/student/{st_id}")
 def view_student(st_id: int):
     cursor.execute("SELECT * FROM STUDENT WHERE id = %s", (st_id,))
-    st = cursor.fetchone()  # fetch one row
+    st = cursor.fetchone()  
     if not st:
         raise HTTPException(
             status_code=404,
             detail=f"Student with ID {st_id} Not Found"
         )
     return {"Student Details": st}
+
+
+@app.delete("/student/delete/{st_id}")
+def delete (st_id : int):
+    cursor.execute(""" DELETE FROM STUDENT WHERE id = %s RETURNING * """,
+                   (st_id,))
+    st = cursor.fetchone()
+    conn.commit()
+
+    return {"Deleted Student : ":  st}
+
