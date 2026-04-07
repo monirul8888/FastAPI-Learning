@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 
-from . import models, schemas
+from . import models, schemas, utils
 from sqlalchemy.orm import Session
 from . database import engine, get_db
 
@@ -164,7 +164,11 @@ class Student(BaseModel):
 
 @app.post("/users", response_model=schemas.UserResponse)
 def user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    new_user = models.user(**user.model_dump())
+    if db.query(models.User).filter(models.User.email==user.email).first():
+        raise HTTPException(status_code=400, detail=f"Email {user.email} already exists")
+    hashedPassword = utils.hashPassword(user.password)
+    user.password  = hashedPassword
+    new_user = models.User(**user.model_dump())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
