@@ -43,14 +43,32 @@ def student(st_id: int, update_st: Student1, db:Session = Depends(get_db)):
 
     st = db.query(models.Student).filter(models.Student.id == st_id)
     st_data= st.first()
-    data = update_st.model_dump()
-
-    st.update(data, synchronize_session=False )
+    st.update(update_st.model_dump(), synchronize_session=False )
     db.commit()
     db.refresh(st_data)
-
     return{"status" : "SQL Alchemy Working",
            "Student Details": st_data}
+
+from fastapi import HTTPException
+
+@app.delete("/student/{st_id}")
+def delete_student(st_id: int, db: Session = Depends(get_db)):
+
+    st = db.query(models.Student).filter(models.Student.id == st_id).first()
+
+    deleted_student = {
+        "id": st.id,
+        "name": st.name,
+        "dept": st.dept,
+    }
+
+    db.delete(st)
+    db.commit()
+
+    return {
+        "status": "Deleted Successfully",
+        "Student Details": deleted_student
+    }
 
 
 
