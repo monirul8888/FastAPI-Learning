@@ -29,6 +29,15 @@ def student(db:Session = Depends(get_db)):
            "Student Details": st}
 
 
+@app.get("/student/{st_id}")
+def student(st_id: int, db:Session = Depends(get_db)):
+
+    st = db.query(models.Student).filter(models.Student.id == st_id).first()
+
+    return{"status" : "SQL Alchemy Working",
+           "Student Details": st}
+
+
 
 
 # @app.get("/")
