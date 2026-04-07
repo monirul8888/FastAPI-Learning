@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class StudentCreate(BaseModel):
     name: str
@@ -11,3 +11,7 @@ class StudentResponse(StudentCreate):
 
     class Config:
         orm_model= True
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password : str

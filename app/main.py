@@ -157,3 +157,15 @@ class Student(BaseModel):
 
 
 
+
+
+
+
+
+@app.post("/users")
+def user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    new_user = models.user(**user.model_dump())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
