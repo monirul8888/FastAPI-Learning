@@ -1,62 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
-
-from . import models, schemas, utils
-from sqlalchemy.orm import Session
-from . database import engine, get_db
-
-from typing import List
-
+from fastapi import FastAPI
+from . router import user, student
 app = FastAPI()
-models.Base.metadata.create_all(bind = engine)
 
-
-@app.get("/student", response_model=List[schemas.StudentResponse])
-def student(db:Session = Depends(get_db)):
-
-    st = db.query(models.Student).all()
-    return st
-
-    
-
-@app.get("/student/{st_id}", response_model=schemas.StudentResponse)
-def student(st_id: int, db:Session = Depends(get_db)):
-
-    st = db.query(models.Student).filter(models.Student.id == st_id).first()
-
-    return st
-
-
-@app.put("/student/{st_id}", response_model=schemas.StudentResponse)
-def student(st_id: int, update_st: schemas.StudentCreate, db:Session = Depends(get_db)):
-
-    st = db.query(models.Student).filter(models.Student.id == st_id)
-    st_data= st.first()
-    st.update(update_st.model_dump(), synchronize_session=False )
-    db.commit()
-    db.refresh(st_data)
-    return st_data
-
-
-@app.delete("/student/{st_id}")
-def delete_student(st_id: int, db: Session = Depends(get_db)):
-
-    st = db.query(models.Student).filter(models.Student.id == st_id).first()
-
-    deleted_student = {
-        "id": st.id,
-        "name": st.name,
-        "dept": st.dept,
-    }
-    db.delete(st)
-    db.commit()
-    return {
-        "status": "Deleted Successfully",
-        "Student Details": deleted_student
-    }
+app.include_router(user.router)
+app.include_router(student.router)
 
 
 
@@ -71,24 +18,18 @@ def delete_student(st_id: int, db: Session = Depends(get_db)):
 
 
 
-@app.get("/about")
-def about():
-    return {"about" : "This is About Page"}
-
-@app.post("/student", response_model=schemas.StudentResponse)
-def student(st: schemas.StudentCreate, db: Session = Depends(get_db)):
-    new_st = models.Student(**st.model_dump())
-    db.add(new_st)
-    db.commit()
-    db.refresh(new_st)
-    return  new_st
+# @app.get("/about")
+# def about():
+#     return {"about" : "This is About Page"}
 
 
-class Student(BaseModel):
-    name: str
-    id: int
-    dept: str
-    cgpa: float
+
+
+# class Student(BaseModel):
+#     name: str
+#     id: int
+#     dept: str
+#     cgpa: float
 
 
 
@@ -159,17 +100,3 @@ class Student(BaseModel):
 
 
 
-
-
-
-@app.post("/users", response_model=schemas.UserResponse)
-def user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    if db.query(models.User).filter(models.User.email==user.email).first():
-        raise HTTPException(status_code=400, detail=f"Email {user.email} already exists")
-    hashedPassword = utils.hashPassword(user.password)
-    user.password  = hashedPassword
-    new_user = models.User(**user.model_dump())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
